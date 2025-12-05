@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "[STARTUP] AdGuardHome Railway Startup Script"
+echo "[STARTUP] AdGuardHome Railway Startup Script; made by zombi.dev"
 
 # Create base target directory
 echo "[INFO] Creating base directory /opt/adguardhomelink if it doesn't exist..."
@@ -13,6 +13,15 @@ for DIR_NAME in work conf data; do
     TARGET="/opt/adguardhomelink/$DIR_NAME"
     
     echo "[PROCESSING] $SOURCE -> $TARGET"
+    
+    # First, check if target exists and is a symlink pointing back to source (circular link)
+    if [ -L "$TARGET" ]; then
+        TARGET_LINK=$(readlink "$TARGET")
+        if [ "$TARGET_LINK" = "$SOURCE" ]; then
+            echo "[FIX] Removing circular symlink at $TARGET -> $SOURCE"
+            rm "$TARGET"
+        fi
+    fi
     
     # Check if source exists
     if [ -e "$SOURCE" ]; then
